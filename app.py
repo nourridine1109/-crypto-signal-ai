@@ -234,7 +234,40 @@ def analyze(symbol):
 
     if b.rsi>74: score-=10; why.append("Überkauft")
     if b.rsi<26: score+=10; why.append("Überverkauft")
+# Marktfilter nur für Aktien
+if not symbol.endswith("USDT"):
+    try:
+        market_df = klines("QQQ", "4h")
 
+        if market_df is not None and len(market_df) >= 50:
+            market_df = indicators(market_df)
+            m = market_df.iloc[-1]
+
+            market_bullish = m.close > m.ema20 > m.ema50
+            market_bearish = m.close < m.ema20 < m.ema50
+
+            if score > 50:
+                if market_bullish:
+                    score += 8
+                    why.append("Nasdaq bestätigt LONG")
+                elif market_bearish:
+                    score -= 8
+                    why.append("Nasdaq widerspricht LONG")
+                else:
+                    why.append("Nasdaq neutral")
+
+            elif score < 50:
+                if market_bearish:
+                    score -= 8
+                    why.append("Nasdaq bestätigt SHORT")
+                elif market_bullish:
+                    score += 8
+                    why.append("Nasdaq widerspricht SHORT")
+                else:
+                    why.append("Nasdaq neutral")
+
+    except Exception:
+        why.append("Nasdaq Marktfilter nicht verfügbar")
     score=max(0,min(100,int(round(score))))
     long_score = score
     short_score = 100 - score
