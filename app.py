@@ -205,7 +205,7 @@ def analyze(symbol):
     d4=indicators(klines(symbol,"4h"))
     a,b,c=d15.iloc[-1],d1.iloc[-1],d4.iloc[-1]
     score=50; why=[]
-# Marktfilter nur für Aktien
+ Marktfilter nur für Aktien
 if not symbol.endswith("USDT"):
     try:
         market_df = indicators(klines("QQQ", "4h"))
