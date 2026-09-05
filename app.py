@@ -31,24 +31,59 @@ st.markdown("""
 h1 {font-size: 1.85rem !important;}
 </style>
 """, unsafe_allow_html=True)
-
 BASE = "https://api.binance.com"
-DEFAULT = ["BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT","KASUSDT"]
+BASES = [
+    "https://api.binance.com",
+    "https://api1.binance.com",
+    "https://api2.binance.com",
+    "https://api3.binance.com",
+]
+
+DEFAULT = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "KASUSDT"]
 
 @st.cache_data(ttl=45)
 def klines(symbol, interval, limit=500):
-    r = requests.get(
-        f"{BASE}/api/v3/klines",
-        params={"symbol":symbol,"interval":interval,"limit":limit},
-        timeout=12
-    )
-    r.raise_for_status()
-    cols=["time","open","high","low","close","volume","ct","qv","trades","tb","tq","x"]
-    df=pd.DataFrame(r.json(),columns=cols)
-    for c in ["open","high","low","close","volume"]:
-        df[c]=pd.to_numeric(df[c],errors="coerce")
-    df["time"]=pd.to_datetime(df["time"],unit="ms",utc=True)
-    return df
+    last_error = None
+
+    for base in BASES:
+        try:
+            r = requests.get(
+                f"{base}/api/v3/klines",
+                params={
+                    "symbol": symbol,
+                    "interval": interval,
+                    "limit": limit
+                },
+                timeout=12
+            )
+
+            r.raise_for_status()
+
+            data = r.json()
+
+            if not data:
+                continue
+
+            cols = [
+                "time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_volume", "trades",
+                "taker_buy_base", "taker_buy_quote", "ignore"
+            ]
+
+            df = pd.DataFrame(data, columns=cols)
+
+            for c in ["open", "high", "low", "close", "volume"]:
+                df[c] = pd.to_numeric(df[c], errors="coerce")
+
+            df["time"] = pd.to_datetime(df["time"], unit="ms", utc=True)
+
+            return df
+
+        except Exception as e:
+            last_error = str(e)
+
+    st.warning(f"{symbol}: Datenfehler – {last_error}")
+    return None
 
 def indicators(df):
     d=df.copy()
