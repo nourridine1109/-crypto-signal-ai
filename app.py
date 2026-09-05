@@ -205,27 +205,7 @@ def analyze(symbol):
     d4=indicators(klines(symbol,"4h"))
     a,b,c=d15.iloc[-1],d1.iloc[-1],d4.iloc[-1]
     score=50; why=[]
- Marktfilter nur für Aktien
-if not symbol.endswith("USDT"):
-    try:
-        market_df = indicators(klines("QQQ", "4h"))
 
-        if market_df is not None and len(market_df) > 0:
-            m = market_df.iloc[-1]
-
-            if m.close > m.ema20 > m.ema50:
-                score += 8
-                why.append("Nasdaq Markttrend bullish")
-
-            elif m.close < m.ema20 < m.ema50:
-                score -= 8
-                why.append("Nasdaq Markttrend bearish")
-
-            else:
-                why.append("Nasdaq Markttrend neutral")
-
-    except Exception:
-        why.append("Nasdaq Marktfilter nicht verfügbar")
     if c.ema20>c.ema50>c.ema200:
         score+=18; why.append("4H Trend bullish")
     elif c.ema20<c.ema50<c.ema200:
