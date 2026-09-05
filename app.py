@@ -688,8 +688,7 @@ if results:
             st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
 
         st.write("**Warum?**")
-        st.write("**Warum?**")
-        for w in r["why"]:
+            for w in r["why"]:
             st.write("• " + w)
 
         st.write("**3-I-Check:** impulsiv? irrational? inkonsequent? → bei Ja kein Trade.")
