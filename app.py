@@ -669,7 +669,7 @@ if results:
         else:
             st.write("**Earnings:** Kein naher Termin erkannt")
 
-        # Aktuelle Aktien-News
+             # Aktuelle Aktien-News
         news = r.get("stock_news")
 
         if news:
@@ -684,9 +684,10 @@ if results:
                     st.markdown(f"- [{title}]({url}) — {publisher}")
                 else:
                     st.write(f"• {title} — {publisher}")
-
         else:
             st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
+
+        st.write("**Warum?**")
         st.write("**Warum?**")
         for w in r["why"]:
             st.write("• " + w)
