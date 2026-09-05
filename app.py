@@ -684,9 +684,9 @@ if results:
                     st.markdown(f"- [{title}]({url}) — {publisher}")
                 else:
                     st.write(f"• {title} — {publisher}")
+
         else:
             st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
-
         st.write("**Warum?**")
         for w in r["why"]:
             st.write("• " + w)
