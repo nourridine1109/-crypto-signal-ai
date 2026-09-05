@@ -1,4 +1,4 @@
-
+import yfinance as yf
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +6,7 @@ import requests
 from datetime import datetime, timezone
 
 st.set_page_config(
-    page_title="Crypto Signal AI",
+page_title="Market Signal AI",
     page_icon="📈",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -35,10 +35,108 @@ BASES = [
     "https://data-api.binance.vision"
 ]
 
-DEFAULT = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "KASUSDT"]
+CRYPTO_DEFAULT = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"]
+STOCK_DEFAULT = ["NVDA", "AAPL", "MSFT", "TSLA", "AMZN", "META", "GOOGL"]
 
 @st.cache_data(ttl=45)
 def klines(symbol, interval, limit=500):
+
+    # ==========================================
+    # AKTIEN über Yahoo Finance
+    # ==========================================
+    if not symbol.endswith("USDT"):
+        try:
+            ticker = yf.Ticker(symbol)
+
+            # Yahoo unterstützt kein direktes 4H-Intervall.
+            # Deshalb laden wir 1H und bauen daraus 4H-Kerzen.
+            if interval == "4h":
+                period = "730d"
+                yf_interval = "60m"
+
+            elif interval == "1h":
+                period = "730d"
+                yf_interval = "60m"
+
+            elif interval == "15m":
+                period = "60d"
+                yf_interval = "15m"
+
+            else:
+                period = "60d"
+                yf_interval = interval
+
+            df = ticker.history(
+                period=period,
+                interval=yf_interval,
+                auto_adjust=False,
+                prepost=False
+            )
+
+            if df is None or df.empty:
+                st.warning(f"{symbol}: Keine Aktiendaten gefunden")
+                return None
+
+            df = df.reset_index()
+
+            # Zeitspalte finden
+            if "Datetime" in df.columns:
+                df.rename(columns={"Datetime": "time"}, inplace=True)
+
+            elif "Date" in df.columns:
+                df.rename(columns={"Date": "time"}, inplace=True)
+
+            # Spalten vereinheitlichen
+            df.rename(columns={
+                "Open": "open",
+                "High": "high",
+                "Low": "low",
+                "Close": "close",
+                "Volume": "volume"
+            }, inplace=True)
+
+            df["time"] = pd.to_datetime(df["time"], utc=True)
+
+            df = df[
+                ["time", "open", "high", "low", "close", "volume"]
+            ].copy()
+
+            for c in ["open", "high", "low", "close", "volume"]:
+                df[c] = pd.to_numeric(df[c], errors="coerce")
+
+            df = df.dropna(
+                subset=["open", "high", "low", "close"]
+            )
+
+            # 1H -> 4H umwandeln
+            if interval == "4h":
+
+                df = df.set_index("time")
+
+                df = df.resample("4h").agg({
+                    "open": "first",
+                    "high": "max",
+                    "low": "min",
+                    "close": "last",
+                    "volume": "sum"
+                })
+
+                df = df.dropna(
+                    subset=["open", "high", "low", "close"]
+                )
+
+                df = df.reset_index()
+
+            return df.tail(limit).reset_index(drop=True)
+
+        except Exception as e:
+            st.warning(f"{symbol}: Aktiendatenfehler – {str(e)}")
+            return None
+
+
+    # ==========================================
+    # KRYPTO über Binance
+    # ==========================================
     last_error = None
 
     for base in BASES:
@@ -71,7 +169,11 @@ def klines(symbol, interval, limit=500):
             for c in ["open", "high", "low", "close", "volume"]:
                 df[c] = pd.to_numeric(df[c], errors="coerce")
 
-            df["time"] = pd.to_datetime(df["time"], unit="ms", utc=True)
+            df["time"] = pd.to_datetime(
+                df["time"],
+                unit="ms",
+                utc=True
+            )
 
             return df
 
@@ -176,11 +278,19 @@ def f(x):
     if abs(x)>=1: return f"{x:.4f}"
     return f"{x:.8f}"
 
-st.title("📈 Crypto Signal AI")
-st.caption("iPhone Dashboard · 4H Trend → 1H Setup → 15M Entry")
+st.title("📊 Market Signal AI")
+st.caption("Krypto & Aktien · 4H Trend → 1H Setup → 15M Entry")
+
+market = st.radio(
+    "Markt auswählen",
+    ["🪙 Krypto", "📈 Aktien"],
+    horizontal=True
+)
+
+default_list = CRYPTO_DEFAULT if market == "🪙 Krypto" else STOCK_DEFAULT
 
 with st.expander("⚙️ Watchlist & Filter"):
-    txt=st.text_input("Paare",",".join(DEFAULT))
+    txt = st.text_input("Paare", ",".join(default_list))
     threshold=st.slider("Starkes Signal ab",50,95,70)
     refresh=st.button("🔄 Jetzt aktualisieren",use_container_width=True)
 
