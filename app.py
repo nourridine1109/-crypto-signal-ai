@@ -669,7 +669,7 @@ if results:
         else:
             st.write("**Earnings:** Kein naher Termin erkannt")
 
-             # Aktuelle Aktien-News
+        # Aktuelle Aktien-News
         news = r.get("stock_news")
 
         if news:
