@@ -31,9 +31,7 @@ st.markdown("""
 h1 {font-size: 1.85rem !important;}
 </style>
 """, unsafe_allow_html=True)
-BASE = "https://api.binance.com"
 BASES = [
-    BASES = [
     "https://data-api.binance.vision",
 ]
 
