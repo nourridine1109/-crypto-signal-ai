@@ -274,7 +274,40 @@ def analyze(symbol):
 
         except Exception:
             why.append("Nasdaq Marktfilter nicht verfügbar")
+    # S&P 500 Marktfilter nur für Aktien
+    if not symbol.endswith("USDT"):
+        try:
+            spy_df = klines("SPY", "4h")
 
+            if spy_df is not None and len(spy_df) >= 50:
+                spy_df = indicators(spy_df)
+                s = spy_df.iloc[-1]
+
+                spy_bullish = s.close > s.ema20 > s.ema50
+                spy_bearish = s.close < s.ema20 < s.ema50
+
+                if score > 50:
+                    if spy_bullish:
+                        score += 5
+                        why.append("S&P 500 bestätigt LONG")
+                    elif spy_bearish:
+                        score -= 5
+                        why.append("S&P 500 widerspricht LONG")
+                    else:
+                        why.append("S&P 500 neutral")
+
+                elif score < 50:
+                    if spy_bearish:
+                        score -= 5
+                        why.append("S&P 500 bestätigt SHORT")
+                    elif spy_bullish:
+                        score += 5
+                        why.append("S&P 500 widerspricht SHORT")
+                    else:
+                        why.append("S&P 500 neutral")
+
+        except Exception:
+            why.append("S&P 500 Marktfilter nicht verfügbar")
     score = max(0, min(100, int(round(score))))
     long_score = score
     short_score = 100 - score
