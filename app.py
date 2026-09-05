@@ -593,7 +593,7 @@ if results:
             )
 
             st.write(f"**Fundamental:** {fund_icon} {rating}")
-
+            st.write(f"**Fundamental Score:** {fund.get('score', 0)}/100")
             pe = fund.get("pe")
             rev = fund.get("revenue_growth")
             growth = fund.get("earnings_growth")
