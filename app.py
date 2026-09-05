@@ -33,10 +33,8 @@ h1 {font-size: 1.85rem !important;}
 """, unsafe_allow_html=True)
 BASE = "https://api.binance.com"
 BASES = [
-    "https://api.binance.com",
-    "https://api1.binance.com",
-    "https://api2.binance.com",
-    "https://api3.binance.com",
+    BASES = [
+    "https://data-api.binance.vision",
 ]
 
 DEFAULT = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "KASUSDT"]
