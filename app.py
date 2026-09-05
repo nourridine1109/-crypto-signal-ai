@@ -694,12 +694,7 @@ if results:
 
         st.write("**3-I-Check:** impulsiv? irrational? inkonsequent? → bei Ja kein Trade.")
         st.line_chart(r["chart"])
-            st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
-            st.write("**Earnings:** Kein naher Termin erkannt")
-            st.write("**Warum?**")
-            for w in r["why"]: st.write("• "+w)
-            st.write("**3-I-Check:** impulsiv? irrational? inkonsequent? → bei Ja kein Trade.")
-            st.line_chart(r["chart"])
+            
 
 if errors:
     st.warning(" · ".join(errors))
