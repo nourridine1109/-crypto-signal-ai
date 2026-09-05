@@ -465,8 +465,10 @@ def analyze(symbol):
     earnings_days = None
     risk_level = "Normal"
     fundamentals = None
+    stock_news = None
     if not symbol.endswith("USDT"):
         fundamentals = get_fundamentals(symbol) 
+        stock_news = get_stock_news(symbol)
         earnings_days = get_earnings_days(symbol)
 
         if earnings_days is not None:
@@ -550,6 +552,7 @@ def analyze(symbol):
         earnings_days=earnings_days,
         risk_level=risk_level,
         fundamentals=fundamentals,
+        stock_news=stock_news,
         why=why[-8:],
         chart=d1.tail(120).set_index("time")[
             ["close", "ema20", "ema50", "ema200"]
