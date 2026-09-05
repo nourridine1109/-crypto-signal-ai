@@ -1,0 +1,2 @@
+# -crypto-signal-ai
+Privat 
