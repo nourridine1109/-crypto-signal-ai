@@ -213,35 +213,57 @@ def get_fundamentals(symbol):
         profit_margin = info.get("profitMargins")
         market_cap = info.get("marketCap")
 
-        # einfache Bewertung
-        points = 0
-        checks = 0
+        score = 50
 
+        # Bewertung / KGV
         if pe is not None:
-            checks += 1
-            if 0 < pe < 35:
-                points += 1
+            if 0 < pe <= 20:
+                score += 15
+            elif pe <= 35:
+                score += 10
+            elif pe <= 50:
+                score += 3
+            elif pe > 80:
+                score -= 10
 
+        # Umsatzwachstum
         if revenue_growth is not None:
-            checks += 1
-            if revenue_growth > 0.05:
-                points += 1
+            if revenue_growth >= 0.25:
+                score += 15
+            elif revenue_growth >= 0.10:
+                score += 10
+            elif revenue_growth >= 0.03:
+                score += 5
+            elif revenue_growth < 0:
+                score -= 10
 
+        # Gewinnwachstum
         if earnings_growth is not None:
-            checks += 1
-            if earnings_growth > 0.05:
-                points += 1
+            if earnings_growth >= 0.25:
+                score += 15
+            elif earnings_growth >= 0.10:
+                score += 10
+            elif earnings_growth >= 0.03:
+                score += 5
+            elif earnings_growth < 0:
+                score -= 10
 
+        # Gewinnmarge
         if profit_margin is not None:
-            checks += 1
-            if profit_margin > 0.10:
-                points += 1
+            if profit_margin >= 0.30:
+                score += 15
+            elif profit_margin >= 0.15:
+                score += 10
+            elif profit_margin >= 0.05:
+                score += 5
+            elif profit_margin < 0:
+                score -= 10
 
-        if checks == 0:
-            rating = "Keine Daten"
-        elif points / checks >= 0.75:
+        score = max(0, min(100, int(round(score))))
+
+        if score >= 75:
             rating = "Stark"
-        elif points / checks >= 0.40:
+        elif score >= 50:
             rating = "Neutral"
         else:
             rating = "Schwach"
@@ -252,7 +274,8 @@ def get_fundamentals(symbol):
             "earnings_growth": earnings_growth,
             "profit_margin": profit_margin,
             "market_cap": market_cap,
-            "rating": rating
+            "rating": rating,
+            "score": score
         }
 
     except Exception:
