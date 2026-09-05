@@ -236,78 +236,76 @@ def analyze(symbol):
     if b.rsi<26: score+=10; why.append("Überverkauft")
 
     score=max(0,min(100,int(round(score))))
-    long_score=score
-   # Marktfilter nur für Aktien
-if not symbol.endswith("USDT"):
-    try:
-        market_df = klines("QQQ", "4h")
+    long_score = score
+    short_score = 100 - score
 
-        if market_df is not None and len(market_df) >= 50:
-            market_df = indicators(market_df)
-            m = market_df.iloc[-1]
+    direction = (
+        "LONG" if long_score >= 55
+        else "SHORT" if short_score >= 55
+        else "NEUTRAL"
+    )
 
-            market_bullish = m.close > m.ema20 > m.ema50
-            market_bearish = m.close < m.ema20 < m.ema50
+    strength = max(long_score, short_score) if direction != "NEUTRAL" else 50
 
-            # Aktie aktuell eher LONG-orientiert
-            if score > 50:
-                if market_bullish:
-                    score += 8
-                    why.append("Nasdaq bestätigt LONG")
-                elif market_bearish:
-                    score -= 8
-                    why.append("Nasdaq widerspricht LONG")
-                else:
-                    why.append("Nasdaq neutral")
-
-            # Aktie aktuell eher SHORT-orientiert
-            elif score < 50:
-                if market_bearish:
-                    score -= 8
-                    why.append("Nasdaq bestätigt SHORT")
-                elif market_bullish:
-                    score += 8
-                    why.append("Nasdaq widerspricht SHORT")
-                else:
-                    why.append("Nasdaq neutral")
-
-    except Exception:
-        why.append("Nasdaq Marktfilter nicht verfügbar")
-    short_score=100-score
-    direction="LONG" if long_score>=55 else "SHORT" if short_score>=55 else "NEUTRAL"
-    strength=max(long_score,short_score) if direction!="NEUTRAL" else 50
-
-    if b.ema20>b.ema50>b.ema200:
-        regime="Aufwärtstrend"
-    elif b.ema20<b.ema50<b.ema200:
-        regime="Abwärtstrend"
+    if b.ema20 > b.ema50 > b.ema200:
+        regime = "Aufwärtstrend"
+    elif b.ema20 < b.ema50 < b.ema200:
+        regime = "Abwärtstrend"
     else:
-        regime="Range / Übergang"
+        regime = "Range / Übergang"
 
-    price=float(a.close); atr=float(a.atr)
-    lows=d1.tail(80).low
-    highs=d1.tail(80).high
-    support=float(lows.min())
-    resistance=float(highs.max())
+    price = float(a.close)
+    atr = float(a.atr)
 
-    if direction=="LONG":
-        sl=min(price-1.5*atr,support-.15*atr)
-        risk=max(price-sl,atr)
-        entry=(price-.25*atr,price+.1*atr)
-        tps=(price+1.5*risk,price+2.5*risk,price+4*risk)
-    elif direction=="SHORT":
-        sl=max(price+1.5*atr,resistance+.15*atr)
-        risk=max(sl-price,atr)
-        entry=(price-.1*atr,price+.25*atr)
-        tps=(price-1.5*risk,price-2.5*risk,price-4*risk)
+    lows = d1.tail(80).low
+    highs = d1.tail(80).high
+
+    support = float(lows.min())
+    resistance = float(highs.max())
+
+    if direction == "LONG":
+        sl = min(price - 1.5 * atr, support - .15 * atr)
+        risk = max(price - sl, atr)
+        entry = (price - .25 * atr, price + .1 * atr)
+        tps = (
+            price + 1.5 * risk,
+            price + 2.5 * risk,
+            price + 4 * risk
+        )
+
+    elif direction == "SHORT":
+        sl = max(price + 1.5 * atr, resistance + .15 * atr)
+        risk = max(sl - price, atr)
+        entry = (price - .1 * atr, price + .25 * atr)
+        tps = (
+            price - 1.5 * risk,
+            price - 2.5 * risk,
+            price - 4 * risk
+        )
+
     else:
-        sl=np.nan; entry=(np.nan,np.nan); tps=(np.nan,np.nan,np.nan)
+        sl = np.nan
+        entry = (np.nan, np.nan)
+        tps = (np.nan, np.nan, np.nan)
 
-    return dict(symbol=symbol,price=price,direction=direction,score=strength,
-                long=long_score,short=short_score,regime=regime,
-                support=support,resistance=resistance,entry=entry,sl=sl,tps=tps,
-                why=why[-5:],chart=d1.tail(120).set_index("time")[["close","ema20","ema50","ema200"]])
-
+    return dict(
+        symbol=symbol,
+        price=price,
+        direction=direction,
+        score=strength,
+        long=long_score,
+        short=short_score,
+        regime=regime,
+        support=support,
+        resistance=resistance,
+        entry=entry,
+        sl=sl,
+        tps=tps,
+        why=why[-5:],
+        chart=d1.tail(120).set_index("time")[
+            ["close", "ema20", "ema50", "ema200"]
+        ]
+    )
 def f(x):
     if pd.isna(x): return "–"
     if abs(x)>=1000: return f"{x:,.2f}"
