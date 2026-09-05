@@ -336,21 +336,22 @@ def analyze(symbol):
             why.append("S&P 500 Marktfilter nicht verfügbar")
     # Earnings-Risiko nur für Aktien
     earnings_days = None
+    risk_level = "Normal"
 
     if not symbol.endswith("USDT"):
         earnings_days = get_earnings_days(symbol)
 
         if earnings_days is not None:
             if earnings_days <= 1:
-                score -= 12
-                why.append(f"⚠️ Earnings in {earnings_days} Tag(en) – sehr hohes Gap-Risiko")
+                risk_level = "Sehr hoch"
+                why.append(f"⚠️ Earnings in {earnings_days} Tag(en)")
 
             elif earnings_days <= 3:
-                score -= 8
-                why.append(f"⚠️ Earnings in {earnings_days} Tagen – hohes Gap-Risiko")
+                risk_level = "Hoch"
+                why.append(f"⚠️ Earnings in {earnings_days} Tagen")
 
             elif earnings_days <= 7:
-                score -= 4
+                risk_level = "Erhöht"
                 why.append(f"⚠️ Earnings in {earnings_days} Tagen")            
     score = max(0, min(100, int(round(score))))
     long_score = score
