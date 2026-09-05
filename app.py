@@ -237,6 +237,42 @@ def analyze(symbol):
 
     score=max(0,min(100,int(round(score))))
     long_score=score
+   # Marktfilter nur für Aktien
+if not symbol.endswith("USDT"):
+    try:
+        market_df = klines("QQQ", "4h")
+
+        if market_df is not None and len(market_df) >= 50:
+            market_df = indicators(market_df)
+            m = market_df.iloc[-1]
+
+            market_bullish = m.close > m.ema20 > m.ema50
+            market_bearish = m.close < m.ema20 < m.ema50
+
+            # Aktie aktuell eher LONG-orientiert
+            if score > 50:
+                if market_bullish:
+                    score += 8
+                    why.append("Nasdaq bestätigt LONG")
+                elif market_bearish:
+                    score -= 8
+                    why.append("Nasdaq widerspricht LONG")
+                else:
+                    why.append("Nasdaq neutral")
+
+            # Aktie aktuell eher SHORT-orientiert
+            elif score < 50:
+                if market_bearish:
+                    score -= 8
+                    why.append("Nasdaq bestätigt SHORT")
+                elif market_bullish:
+                    score += 8
+                    why.append("Nasdaq widerspricht SHORT")
+                else:
+                    why.append("Nasdaq neutral")
+
+    except Exception:
+        why.append("Nasdaq Marktfilter nicht verfügbar")
     short_score=100-score
     direction="LONG" if long_score>=55 else "SHORT" if short_score>=55 else "NEUTRAL"
     strength=max(long_score,short_score) if direction!="NEUTRAL" else 50
