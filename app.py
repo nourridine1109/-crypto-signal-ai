@@ -418,7 +418,7 @@ def analyze(symbol):
         entry=entry,
         sl=sl,
         tps=tps,
-        why=why[-5:],
+        why=why[-8:],
         chart=d1.tail(120).set_index("time")[
             ["close", "ema20", "ema50", "ema200"]
         ]
