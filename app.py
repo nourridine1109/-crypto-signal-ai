@@ -32,7 +32,7 @@ h1 {font-size: 1.85rem !important;}
 </style>
 """, unsafe_allow_html=True)
 BASES = [
-    "https://data-api.binance.vision",
+    "https://data-api.binance.vision"
 ]
 
 DEFAULT = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "KASUSDT"]
