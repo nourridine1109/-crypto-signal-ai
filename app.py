@@ -665,8 +665,10 @@ if results:
         st.write(f"**Risiko:** {risk_icon} {risk}")
 
         if earnings_days is not None:
-            st.write(f"**Earnings:** 📅 in {earnings_days} Tag(en)")
+            st.write(f"**Earnings:** 🗓️ in {earnings_days} Tag(en)")
         else:
+            st.write("**Earnings:** Kein naher Termin erkannt")
+
         # Aktuelle Aktien-News
         news = r.get("stock_news")
 
@@ -683,6 +685,14 @@ if results:
                 else:
                     st.write(f"• {title} — {publisher}")
         else:
+            st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
+
+        st.write("**Warum?**")
+        for w in r["why"]:
+            st.write("• " + w)
+
+        st.write("**3-I-Check:** impulsiv? irrational? inkonsequent? → bei Ja kein Trade.")
+        st.line_chart(r["chart"])
             st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
             st.write("**Earnings:** Kein naher Termin erkannt")
             st.write("**Warum?**")
