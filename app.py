@@ -232,7 +232,7 @@ def analyze(symbol):
         else:
             score-=7; why.append("Verkäufer-Volumen")
 
-       if b.rsi > 74:
+    if b.rsi > 74:
         score -= 10
         why.append("Überkauft")
 
