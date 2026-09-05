@@ -198,6 +198,65 @@ def indicators(df):
     d["hh"]=d.high.rolling(20).max().shift(1)
     d["ll"]=d.low.rolling(20).min().shift(1)
     return d
+    @st.cache_data(ttl=3600)
+def get_fundamentals(symbol):
+    if symbol.endswith("USDT"):
+        return None
+
+    try:
+        ticker = yf.Ticker(symbol)
+        info = ticker.info
+
+        pe = info.get("trailingPE")
+        revenue_growth = info.get("revenueGrowth")
+        earnings_growth = info.get("earningsGrowth")
+        profit_margin = info.get("profitMargins")
+        market_cap = info.get("marketCap")
+
+        # einfache Bewertung
+        points = 0
+        checks = 0
+
+        if pe is not None:
+            checks += 1
+            if 0 < pe < 35:
+                points += 1
+
+        if revenue_growth is not None:
+            checks += 1
+            if revenue_growth > 0.05:
+                points += 1
+
+        if earnings_growth is not None:
+            checks += 1
+            if earnings_growth > 0.05:
+                points += 1
+
+        if profit_margin is not None:
+            checks += 1
+            if profit_margin > 0.10:
+                points += 1
+
+        if checks == 0:
+            rating = "Keine Daten"
+        elif points / checks >= 0.75:
+            rating = "Stark"
+        elif points / checks >= 0.40:
+            rating = "Neutral"
+        else:
+            rating = "Schwach"
+
+        return {
+            "pe": pe,
+            "revenue_growth": revenue_growth,
+            "earnings_growth": earnings_growth,
+            "profit_margin": profit_margin,
+            "market_cap": market_cap,
+            "rating": rating
+        }
+
+    except Exception:
+        return None
 @st.cache_data(ttl=3600)
 def get_earnings_days(symbol):
     if symbol.endswith("USDT"):
