@@ -1,7 +1,7 @@
 # -crypto-signal-ai
 Privat 
 
-# Crypto Signal AI – iPhone V2
+# Crypto Signal AI –  V2
 
 Diese Version ist für eine schmale iPhone-Oberfläche optimiert.
 
