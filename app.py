@@ -667,6 +667,23 @@ if results:
         if earnings_days is not None:
             st.write(f"**Earnings:** 📅 in {earnings_days} Tag(en)")
         else:
+        # Aktuelle Aktien-News
+        news = r.get("stock_news")
+
+        if news:
+            st.write("**📰 Aktuelle News:**")
+
+            for article in news[:3]:
+                title = article.get("title", "Ohne Titel")
+                publisher = article.get("publisher", "")
+                url = article.get("url", "")
+
+                if url:
+                    st.markdown(f"- [{title}]({url}) — {publisher}")
+                else:
+                    st.write(f"• {title} — {publisher}")
+        else:
+            st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
             st.write("**Earnings:** Kein naher Termin erkannt")
             st.write("**Warum?**")
             for w in r["why"]: st.write("• "+w)
