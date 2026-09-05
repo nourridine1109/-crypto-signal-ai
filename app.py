@@ -483,6 +483,23 @@ if results:
             st.write(f"**Stop-Loss:** {f(r['sl'])}")
             st.write(f"**TP1:** {f(r['tps'][0])}  ·  **TP2:** {f(r['tps'][1])}  ·  **TP3:** {f(r['tps'][2])}")
             st.progress(r["score"]/100,text=f"Signalqualität {r['score']}/100")
+        # Risiko & Earnings anzeigen
+        risk = r.get("risk_level", "Normal")
+        earnings_days = r.get("earnings_days")
+
+        risk_icon = (
+            "🟢" if risk == "Normal"
+            else "🟡" if risk == "Erhöht"
+            else "🟠" if risk == "Hoch"
+            else "🔴"
+        )
+
+        st.write(f"**Risiko:** {risk_icon} {risk}")
+
+        if earnings_days is not None:
+            st.write(f"**Earnings:** 📅 in {earnings_days} Tag(en)")
+        else:
+            st.write("**Earnings:** Kein naher Termin erkannt")
             st.write("**Warum?**")
             for w in r["why"]: st.write("• "+w)
             st.write("**3-I-Check:** impulsiv? irrational? inkonsequent? → bei Ja kein Trade.")
