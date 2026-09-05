@@ -198,6 +198,51 @@ def indicators(df):
     d["hh"]=d.high.rolling(20).max().shift(1)
     d["ll"]=d.low.rolling(20).min().shift(1)
     return d
+@st.cache_data(ttl=900)
+def get_stock_news(symbol):
+    if symbol.endswith("USDT"):
+        return None
+
+    try:
+        ticker = yf.Ticker(symbol)
+        news = ticker.news
+
+        if not news:
+            return None
+
+        items = []
+
+        for article in news[:10]:
+            content = article.get("content", article)
+
+            title = content.get("title", "")
+            summary = content.get("summary", "")
+            provider = content.get("provider", {})
+
+            if isinstance(provider, dict):
+                publisher = provider.get("displayName", "")
+            else:
+                publisher = str(provider)
+
+            click = content.get("clickThroughUrl") or content.get("canonicalUrl")
+
+            url = ""
+            if isinstance(click, dict):
+                url = click.get("url", "")
+            elif isinstance(click, str):
+                url = click
+
+            items.append({
+                "title": title,
+                "summary": summary,
+                "publisher": publisher,
+                "url": url
+            })
+
+        return items if items else None
+
+    except Exception:
+        return None    
 @st.cache_data(ttl=3600)
 def get_fundamentals(symbol):
     if symbol.endswith("USDT"):
