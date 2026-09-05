@@ -556,7 +556,41 @@ if results:
             else "🟠" if risk == "Hoch"
             else "🔴"
         )
+        # Fundamentaldaten anzeigen
+        fund = r.get("fundamentals")
 
+        if fund:
+            rating = fund.get("rating", "Keine Daten")
+
+            fund_icon = (
+                "🟢" if rating == "Stark"
+                else "🟡" if rating == "Neutral"
+                else "🔴" if rating == "Schwach"
+                else "⚪"
+            )
+
+            st.write(f"**Fundamental:** {fund_icon} {rating}")
+
+            pe = fund.get("pe")
+            rev = fund.get("revenue_growth")
+            growth = fund.get("earnings_growth")
+            margin = fund.get("profit_margin")
+            cap = fund.get("market_cap")
+
+            if pe is not None:
+                st.write(f"**KGV:** {pe:.2f}")
+
+            if rev is not None:
+                st.write(f"**Umsatzwachstum:** {rev * 100:+.1f}%")
+
+            if growth is not None:
+                st.write(f"**Gewinnwachstum:** {growth * 100:+.1f}%")
+
+            if margin is not None:
+                st.write(f"**Gewinnmarge:** {margin * 100:.1f}%")
+
+            if cap is not None:
+                st.write(f"**Marktkapitalisierung:** ${cap / 1_000_000_000:.1f} Mrd.")
         st.write(f"**Risiko:** {risk_icon} {risk}")
 
         if earnings_days is not None:
