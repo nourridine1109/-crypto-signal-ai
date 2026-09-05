@@ -198,7 +198,33 @@ def indicators(df):
     d["hh"]=d.high.rolling(20).max().shift(1)
     d["ll"]=d.low.rolling(20).min().shift(1)
     return d
+@st.cache_data(ttl=3600)
+def get_earnings_days(symbol):
+    if symbol.endswith("USDT"):
+        return None
 
+    try:
+        ticker = yf.Ticker(symbol)
+        dates = ticker.get_earnings_dates(limit=8)
+
+        if dates is None or dates.empty:
+            return None
+
+        now = pd.Timestamp.now(tz="UTC")
+
+        earnings_dates = pd.to_datetime(dates.index, utc=True)
+        future_dates = earnings_dates[earnings_dates >= now]
+
+        if len(future_dates) == 0:
+            return None
+
+        next_earnings = future_dates.min()
+        days = (next_earnings - now).total_seconds() / 86400
+
+        return max(0, int(np.ceil(days)))
+
+    except Exception:
+        return None
 def analyze(symbol):
     d15=indicators(klines(symbol,"15m"))
     d1=indicators(klines(symbol,"1h"))
@@ -308,6 +334,24 @@ def analyze(symbol):
 
         except Exception:
             why.append("S&P 500 Marktfilter nicht verfügbar")
+    # Earnings-Risiko nur für Aktien
+    earnings_days = None
+
+    if not symbol.endswith("USDT"):
+        earnings_days = get_earnings_days(symbol)
+
+        if earnings_days is not None:
+            if earnings_days <= 1:
+                score -= 12
+                why.append(f"⚠️ Earnings in {earnings_days} Tag(en) – sehr hohes Gap-Risiko")
+
+            elif earnings_days <= 3:
+                score -= 8
+                why.append(f"⚠️ Earnings in {earnings_days} Tagen – hohes Gap-Risiko")
+
+            elif earnings_days <= 7:
+                score -= 4
+                why.append(f"⚠️ Earnings in {earnings_days} Tagen")            
     score = max(0, min(100, int(round(score))))
     long_score = score
     short_score = 100 - score
