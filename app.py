@@ -198,7 +198,7 @@ def indicators(df):
     d["hh"]=d.high.rolling(20).max().shift(1)
     d["ll"]=d.low.rolling(20).min().shift(1)
     return d
-    @st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600)
 def get_fundamentals(symbol):
     if symbol.endswith("USDT"):
         return None
