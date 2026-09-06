@@ -250,7 +250,7 @@ def get_stock_news(symbol):
             provider = content.get("provider", {})
 
             title_text = title.lower()
-text = f"{title} {summary}".lower()
+            text = f"{title} {summary}".lower()
 
 # Nur News behalten, bei denen die Aktie direkt im Titel vorkommt
 if not any(term in title_text for term in relevant_terms):
