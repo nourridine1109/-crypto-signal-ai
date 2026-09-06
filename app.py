@@ -648,6 +648,8 @@ def analyze(symbol):
     # CRV / Trade-Freigabe
     crv = np.nan
     trade_ok = False
+    wait_price = np.nan
+    target_crv = 1.5
     trade_reason = "Kein aktives Signal"
 
     if direction == "LONG":
@@ -681,6 +683,7 @@ def analyze(symbol):
             trade_ok = False
             trade_status = "WARTEN"
             trade_reason = "Starkes Setup, aber besserer Einstieg nötig"
+            wait_price = (tps[0] + target_crv * sl) / (1 + target_crv)
 
         elif overall_score < 85:
             trade_ok = False
@@ -699,6 +702,8 @@ def analyze(symbol):
         overall_score=overall_score,
         overall_rating=overall_rating,
         crv=crv,
+        target_crv=target_crv,
+        wait_price=wait_price,
         trade_ok=trade_ok,
         trade_reason=trade_reason,
         trade_status=trade_status,
