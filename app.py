@@ -772,7 +772,7 @@ if results:
     st.subheader("🎯 Signal Radar")
     for r in results:
         icon="🟢" if r["direction"]=="LONG" else "🔴" if r["direction"]=="SHORT" else "⚪"
-               trade_status_card = r.get("trade_status", "NEIN")
+        trade_status_card = r.get("trade_status", "NEIN")
         crv_card = r.get("crv")
 
         trade_icon_card = (
