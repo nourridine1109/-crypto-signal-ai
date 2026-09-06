@@ -670,15 +670,39 @@ def analyze(symbol):
         if trade_risk > 0:
             crv = trade_reward / trade_risk
 
-        # Trade-Freigabe
+# Trade-Freigabe
+trade_status = "NEIN"
+
+if direction != "NEUTRAL" and pd.notna(crv):
+
+    # Volle Freigabe
+    if overall_score >= 85 and crv >= 1.50 and risk_level != "Sehr hoch":
+        trade_ok = True
+        trade_status = "JA"
+        trade_reason = "Starkes Setup + CRV ausreichend"
+
+    # Sehr gutes Setup, CRV nur knapp unter 1.50
+    elif overall_score >= 90 and crv >= 1.45 and risk_level != "Sehr hoch":
+        trade_ok = True
+        trade_status = "JA"
+        trade_reason = "Starkes Setup + CRV knapp unter 1.50"
+
+    # Gutes Setup, aber Preis noch nicht attraktiv genug
+    elif overall_score >= 85 and crv < 1.45 and risk_level != "Sehr hoch":
+        trade_ok = False
+        trade_status = "WARTEN"
+        trade_reason = "Starkes Setup, aber besserer Einstieg nötig"
+        wait_price = (tps[0] + target_crv * sl) / (1 + target_crv)
+
+    elif overall_score < 85:
+        trade_ok = False
         trade_status = "NEIN"
+        trade_reason = "Gesamt-Score unter 85"
 
-    if direction != "NEUTRAL" and pd.notna(crv):
-        if overall_score >= 85 and crv >= 1.5 and risk_level != "Sehr hoch":
-            trade_ok = True
-            trade_status = "JA"
-            trade_reason = "Starkes Setup + CRV ausreichend"
-
+    elif risk_level == "Sehr hoch":
+        trade_ok = False
+        trade_status = "NEIN"
+        trade_reason = "Event-Risiko sehr hoch"
         elif overall_score >= 85 and crv < 1.5 and risk_level != "Sehr hoch":
             trade_ok = False
             trade_status = "WARTEN"
