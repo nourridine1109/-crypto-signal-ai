@@ -715,8 +715,9 @@ if results:
         st.markdown(
             f"""<div class="signal-card">
             <b>{icon} {r['symbol'].replace('USDT','')}</b>
-            <span style="float:right" class="bigscore">{r['score']}/100</span><br>
+            <span style="float:right" class="bigscore">{r['overall_score']}/100</span>
             <span>{r['direction']} · {r['regime']}</span><br>
+            <span>Gesamtbewertung: {r['overall_rating']}</span><br>
             <span class="small">Preis: {f(r['price'])}</span>
             </div>""", unsafe_allow_html=True
         )
