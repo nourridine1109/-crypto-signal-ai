@@ -249,12 +249,13 @@ def get_stock_news(symbol):
             summary = content.get("summary", "")
             provider = content.get("provider", {})
 
-             title_text = title.lower()
-        text = f"{title} {summary}".lower()
+            title_text = title.lower()
+            text = f"{title} {summary}".lower()
 
-        # Nur News behalten, wenn die Aktie direkt im Titel vorkommt
-        if not any(term in title_text for term in relevant_terms):
-            continue
+            # Nur News behalten, wenn die Aktie direkt im Titel vorkommt
+            if not any(term in title_text for term in relevant_terms):
+                continue
+                
             if isinstance(provider, dict):
                 publisher = provider.get("displayName", "")
             else:
