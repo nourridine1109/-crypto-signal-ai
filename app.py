@@ -210,14 +210,50 @@ def get_stock_news(symbol):
         if not news:
             return None
 
-        items = []
+        company_names = {
+            "NVDA": ["nvidia", "nvda"],
+            "AAPL": ["apple", "aapl"],
+            "MSFT": ["microsoft", "msft"],
+            "TSLA": ["tesla", "tsla"],
+            "AMZN": ["amazon", "amzn"],
+            "META": ["meta", "facebook"],
+            "GOOGL": ["alphabet", "google", "googl"]
+        }
 
-        for article in news[:10]:
+        relevant_terms = company_names.get(
+            symbol,
+            [symbol.lower()]
+        )
+
+        positive_words = [
+            "beat", "beats", "growth", "surge", "rally",
+            "record", "upgrade", "strong", "bullish",
+            "profit", "profits", "revenue growth",
+            "outperform", "raises", "raised", "demand"
+        ]
+
+        negative_words = [
+            "miss", "misses", "drop", "falls", "decline",
+            "downgrade", "weak", "bearish", "loss",
+            "lawsuit", "investigation", "cut", "cuts",
+            "warning", "slump", "risk"
+        ]
+
+        items = []
+        sentiment_total = 0
+
+        for article in news[:15]:
             content = article.get("content", article)
 
             title = content.get("title", "")
             summary = content.get("summary", "")
             provider = content.get("provider", {})
+
+            text = f"{title} {summary}".lower()
+
+            # Nur Nachrichten behalten, die wirklich zur Aktie passen
+            if not any(term in text for term in relevant_terms):
+                continue
 
             if isinstance(provider, dict):
                 publisher = provider.get("displayName", "")
@@ -232,17 +268,52 @@ def get_stock_news(symbol):
             elif isinstance(click, str):
                 url = click
 
+            article_sentiment = 0
+
+            for word in positive_words:
+                if word in text:
+                    article_sentiment += 1
+
+            for word in negative_words:
+                if word in text:
+                    article_sentiment -= 1
+
+            sentiment_total += article_sentiment
+
             items.append({
                 "title": title,
                 "summary": summary,
                 "publisher": publisher,
-                "url": url
+                "url": url,
+                "sentiment": article_sentiment
             })
 
-        return items if items else None
+        if not items:
+            return {
+                "items": [],
+                "score": 50,
+                "rating": "Neutral"
+            }
+
+        # News Score 0–100
+        score = 50 + sentiment_total * 6
+        score = max(0, min(100, score))
+
+        if score >= 65:
+            rating = "Positiv"
+        elif score <= 35:
+            rating = "Negativ"
+        else:
+            rating = "Neutral"
+
+        return {
+            "items": items[:5],
+            "score": score,
+            "rating": rating
+        }
 
     except Exception:
-        return None    
+        return None
 @st.cache_data(ttl=3600)
 def get_fundamentals(symbol):
     if symbol.endswith("USDT"):
