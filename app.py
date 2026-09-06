@@ -834,10 +834,16 @@ if results:
         else:
             st.write("**CRV:** –")
 
-        if trade_ok:
-            st.write("**Trade-Freigabe:** 🟢 JA")
+        trade_status = r.get("trade_status", "NEIN")
+
+        if trade_status == "JA":
+        st.write("**Trade-Freigabe:** 🟢 JA")
+
+        elif trade_status == "WARTEN":
+        st.write("**Trade-Freigabe:** 🟡 WARTEN")
+
         else:
-            st.write("**Trade-Freigabe:** 🔴 NEIN")
+        st.write("**Trade-Freigabe:** 🔴 NEIN")
 
         if trade_reason:
             st.write(f"**Grund:** {trade_reason}")
