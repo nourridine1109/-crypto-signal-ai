@@ -812,7 +812,22 @@ if results:
             if cap is not None:
                 st.write(f"**Marktkapitalisierung:** ${cap / 1_000_000_000:.1f} Mrd.")
         st.write(f"**Risiko:** {risk_icon} {risk}")
+        crv = r.get("crv")
+        trade_ok = r.get("trade_ok", False)
+        trade_reason = r.get("trade_reason", "")
 
+        if crv is not None and pd.notna(crv):
+            st.write(f"**CRV:** 🎯 {crv:.2f} : 1")
+        else:
+            st.write("**CRV:** –")
+
+        if trade_ok:
+            st.write("**Trade-Freigabe:** 🟢 JA")
+        else:
+            st.write("**Trade-Freigabe:** 🔴 NEIN")
+
+        if trade_reason:
+            st.write(f"**Grund:** {trade_reason}")
         if earnings_days is not None:
             st.write(f"**Earnings:** 🗓️ in {earnings_days} Tag(en)")
         else:
