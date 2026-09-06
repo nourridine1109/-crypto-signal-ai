@@ -741,20 +741,37 @@ if results:
             st.write("**Earnings:** Kein naher Termin erkannt")
 
         # Aktuelle Aktien-News
-        news = r.get("stock_news")
+        news_data = r.get("stock_news")
 
-        if news:
-            st.write("**📰 Aktuelle News:**")
+        if news_data:
+            news_items = news_data.get("items", [])
+            news_score = news_data.get("score", 50)
+            news_rating = news_data.get("rating", "Neutral")
 
-            for article in news[:3]:
-                title = article.get("title", "Ohne Titel")
-                publisher = article.get("publisher", "")
-                url = article.get("url", "")
+            news_icon = (
+                "🟢" if news_rating == "Positiv"
+                else "🔴" if news_rating == "Negativ"
+                else "🟡"
+            )
 
-                if url:
-                    st.markdown(f"- [{title}]({url}) — {publisher}")
-                else:
-                    st.write(f"• {title} — {publisher}")
+            st.write(f"**📰 News-Stimmung:** {news_icon} {news_rating}")
+            st.write(f"**News Score:** {news_score}/100")
+
+            if news_items:
+                st.write("**Aktuelle News:**")
+
+                for article in news_items[:3]:
+                    title = article.get("title", "Ohne Titel")
+                    publisher = article.get("publisher", "")
+                    url = article.get("url", "")
+
+                    if url:
+                        st.markdown(f"- [{title}]({url}) — {publisher}")
+                    else:
+                        st.write(f"• {title} — {publisher}")
+            else:
+                st.write("**📰 News:** Keine relevanten Meldungen gefunden")
+
         else:
             st.write("**📰 News:** Keine aktuellen Meldungen gefunden")
 
