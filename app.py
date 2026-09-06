@@ -254,7 +254,7 @@ def get_stock_news(symbol):
 
 # Nur News behalten, bei denen die Aktie direkt im Titel vorkommt
             if not any(term in title_text for term in relevant_terms):
-    continue
+   
             continue
             title_text = title.lower()
             text = f"{title} {summary}".lower()
