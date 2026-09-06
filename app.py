@@ -671,7 +671,7 @@ def analyze(symbol):
         # Trade-Freigabe
         trade_status = "NEIN"
 
-        if direction != "NEUTRAL" and pd.notna(crv):
+    if direction != "NEUTRAL" and pd.notna(crv):
         if overall_score >= 85 and crv >= 1.5 and risk_level != "Sehr hoch":
             trade_ok = True
             trade_status = "JA"
