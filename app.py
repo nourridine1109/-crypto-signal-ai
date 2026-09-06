@@ -772,14 +772,31 @@ if results:
     st.subheader("🎯 Signal Radar")
     for r in results:
         icon="🟢" if r["direction"]=="LONG" else "🔴" if r["direction"]=="SHORT" else "⚪"
+               trade_status_card = r.get("trade_status", "NEIN")
+        crv_card = r.get("crv")
+
+        trade_icon_card = (
+            "🟢" if trade_status_card == "JA"
+            else "🟡" if trade_status_card == "WARTEN"
+            else "🔴"
+        )
+
+        crv_text = (
+            f"{crv_card:.2f} : 1"
+            if crv_card is not None and pd.notna(crv_card)
+            else "–"
+        )
+
         st.markdown(
             f"""<div class="signal-card">
             <b>{icon} {r['symbol'].replace('USDT','')}</b>
-            <span style="float:right" class="bigscore">{r['overall_score']}/100</span>
+            <span style="float:right" class="bigscore">{r['overall_score']}/100</span><br>
             <span>{r['direction']} · {r['regime']}</span><br>
             <span>Gesamtbewertung: {r['overall_rating']}</span><br>
+            <span>{trade_icon_card} Trade: {trade_status_card} · CRV {crv_text}</span><br>
             <span class="small">Preis: {f(r['price'])}</span>
-            </div>""", unsafe_allow_html=True
+            </div>""",
+            unsafe_allow_html=True
         )
         with st.expander(f"Details {r['symbol'].replace('USDT','')}"):
             a,b,c=st.columns(3)
