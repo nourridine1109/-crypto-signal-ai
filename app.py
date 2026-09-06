@@ -645,7 +645,40 @@ def analyze(symbol):
         sl = np.nan
         entry = (np.nan, np.nan)
         tps = (np.nan, np.nan, np.nan)
+    # CRV / Trade-Freigabe
+    crv = np.nan
+    trade_ok = False
+    trade_reason = "Kein aktives Signal"
 
+    if direction == "LONG":
+        # konservativ: oberes Ende der Entry-Zone
+        planned_entry = entry[1]
+        trade_risk = planned_entry - sl
+        trade_reward = tps[0] - planned_entry
+
+        if trade_risk > 0:
+            crv = trade_reward / trade_risk
+
+    elif direction == "SHORT":
+        # konservativ: unteres Ende der Entry-Zone
+        planned_entry = entry[0]
+        trade_risk = sl - planned_entry
+        trade_reward = planned_entry - tps[0]
+
+        if trade_risk > 0:
+            crv = trade_reward / trade_risk
+
+    # Trade-Freigabe
+    if direction != "NEUTRAL" and pd.notna(crv):
+        if overall_score >= 85 and crv >= 1.5 and risk_level != "Sehr hoch":
+            trade_ok = True
+            trade_reason = "Starkes Setup + CRV ausreichend"
+        elif crv < 1.5:
+            trade_reason = "CRV unter 1.5"
+        elif overall_score < 85:
+            trade_reason = "Gesamt-Score unter 85"
+        elif risk_level == "Sehr hoch":
+            trade_reason = "Event-Risiko sehr hoch"
     return dict(
         symbol=symbol,
         price=price,
@@ -653,6 +686,9 @@ def analyze(symbol):
         score=strength,
         overall_score=overall_score,
         overall_rating=overall_rating,
+        crv=crv,
+        trade_ok=trade_ok,
+        trade_reason=trade_reason,
         long=long_score,
         short=short_score,
         regime=regime,
