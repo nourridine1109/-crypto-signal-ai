@@ -566,7 +566,45 @@ def analyze(symbol):
     )
 
     strength = max(long_score, short_score) if direction != "NEUTRAL" else 50
+    # Gesamt-Score V2
+    fund_score = 50
+    news_score = 50
 
+    if fundamentals:
+        fund_score = fundamentals.get("score", 50)
+
+    if stock_news:
+        news_score = stock_news.get("score", 50)
+
+    # Fundamental & News passend zur Handelsrichtung bewerten
+    if direction == "LONG":
+        directional_fund = fund_score
+        directional_news = news_score
+
+    elif direction == "SHORT":
+        directional_fund = 100 - fund_score
+        directional_news = 100 - news_score
+
+    else:
+        directional_fund = 50
+        directional_news = 50
+
+    overall_score = round(
+        strength * 0.60 +
+        directional_fund * 0.25 +
+        directional_news * 0.15
+    )
+
+    overall_score = max(0, min(100, overall_score))
+
+    if overall_score >= 85:
+        overall_rating = "Starkes Setup"
+    elif overall_score >= 70:
+        overall_rating = "Beobachten"
+    elif overall_score >= 55:
+        overall_rating = "Neutral"
+    else:
+        overall_rating = "Kein Trade"
     if b.ema20 > b.ema50 > b.ema200:
         regime = "Aufwärtstrend"
     elif b.ema20 < b.ema50 < b.ema200:
@@ -613,6 +651,8 @@ def analyze(symbol):
         price=price,
         direction=direction,
         score=strength,
+        overall_score=overall_score,
+        overall_rating=overall_rating,
         long=long_score,
         short=short_score,
         regime=regime,
