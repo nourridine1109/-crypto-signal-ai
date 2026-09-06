@@ -249,11 +249,13 @@ def get_stock_news(symbol):
             summary = content.get("summary", "")
             provider = content.get("provider", {})
 
-            text = f"{title} {summary}".lower()
+title_text = title.lower()
+text = f"{title} {summary}".lower()
 
-            # Nur Nachrichten behalten, die wirklich zur Aktie passen
-            if not any(term in text for term in relevant_terms):
-                continue
+# Strenger Filter:
+# Firmenname/Ticker muss direkt in der Überschrift vorkommen
+if not any(term in title_text for term in relevant_terms):
+    continue
 
             if isinstance(provider, dict):
                 publisher = provider.get("displayName", "")
