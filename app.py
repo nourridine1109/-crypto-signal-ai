@@ -250,11 +250,11 @@ def get_stock_news(symbol):
             provider = content.get("provider", {})
 
             title_text = title.lower()
-            text = f"{title} {summar".lower()
-            y}
-            # Strenger Filter:
-            # Firmenname/Ticker muss direkt in der Überschrift vorkommen
-            if not any(term in title_text for term in relevant_terms):
+text = f"{title} {summary}".lower()
+
+# Nur News behalten, bei denen die Aktie direkt im Titel vorkommt
+if not any(term in title_text for term in relevant_terms):
+    continue
             continue
             title_text = title.lower()
             text = f"{title} {summary}".lower()
