@@ -840,6 +840,8 @@ if results:
             st.write("**CRV:** –")
 
         trade_status = r.get("trade_status", "NEIN")
+        wait_price = r.get("wait_price")
+        target_crv = r.get("target_crv", 1.5)
 
         if trade_status == "JA":
             st.write("**Trade-Freigabe:** 🟢 JA")
@@ -851,6 +853,13 @@ if results:
             st.write("**Trade-Freigabe:** 🔴 NEIN")
         if trade_reason:
             st.write(f"**Grund:** {trade_reason}")
+        if trade_status == "WARTEN" and wait_price is not None and pd.notna(wait_price):
+            if r["direction"] == "LONG":
+                st.write(f"**🎯 Besserer Einstieg:** ≤ {f(wait_price)}")
+            elif r["direction"] == "SHORT":
+                st.write(f"**🎯 Besserer Einstieg:** ≥ {f(wait_price)}")
+
+            st.write(f"**Ziel-CRV:** {target_crv:.2f} : 1")
         if earnings_days is not None:
             st.write(f"**Earnings:** 🗓️ in {earnings_days} Tag(en)")
         else:
