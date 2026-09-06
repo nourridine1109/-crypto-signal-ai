@@ -668,16 +668,28 @@ def analyze(symbol):
         if trade_risk > 0:
             crv = trade_reward / trade_risk
 
-    # Trade-Freigabe
-    if direction != "NEUTRAL" and pd.notna(crv):
+        # Trade-Freigabe
+        trade_status = "NEIN"
+
+        if direction != "NEUTRAL" and pd.notna(crv):
         if overall_score >= 85 and crv >= 1.5 and risk_level != "Sehr hoch":
             trade_ok = True
+            trade_status = "JA"
             trade_reason = "Starkes Setup + CRV ausreichend"
-        elif crv < 1.5:
-            trade_reason = "CRV unter 1.5"
+
+        elif overall_score >= 85 and crv < 1.5 and risk_level != "Sehr hoch":
+            trade_ok = False
+            trade_status = "WARTEN"
+            trade_reason = "Starkes Setup, aber besserer Einstieg nötig"
+
         elif overall_score < 85:
+            trade_ok = False
+            trade_status = "NEIN"
             trade_reason = "Gesamt-Score unter 85"
+
         elif risk_level == "Sehr hoch":
+            trade_ok = False
+            trade_status = "NEIN"
             trade_reason = "Event-Risiko sehr hoch"
     return dict(
         symbol=symbol,
@@ -689,6 +701,7 @@ def analyze(symbol):
         crv=crv,
         trade_ok=trade_ok,
         trade_reason=trade_reason,
+        trade_status=trade_status,
         long=long_score,
         short=short_score,
         regime=regime,
